@@ -1,0 +1,70 @@
+const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
+const { Player, GuildQueue } = require('discord-player');
+const { YouTubeExtractor, SpotifyExtractor, AppleMusicExtractor } = require('@discord-player/extractor');
+// const mongoose = require('mongoose');
+
+const fs = require('fs');
+require('dotenv').config();
+
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildPresences,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildMessageTyping,
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.DirectMessageReactions,
+        GatewayIntentBits.DirectMessageTyping,
+        GatewayIntentBits.MessageContent,
+    ],
+    partials: [
+        Partials.GuildScheduledEvent,
+        Partials.ThreadMember,
+        Partials.GuildMember,
+        Partials.Reaction,
+        Partials.Channel,
+        Partials.Message,
+        Partials.User,
+    ]
+});
+
+client.slashCommands = new Collection();
+client.chatCommands = new Collection();
+client.buttons = new Collection();
+client.selectMenus = new Collection();
+client.aliases = new Collection();
+
+const player = new Player(client, {
+    leaveOnEnd: false,
+    leaveOnStop: false,
+    leaveOnEmpty: true,
+    autoSelfDeaf: true,
+    ytdlOptions: {
+        quality: 'highestaudio',
+        highWaterMark: 1 << 25,
+    },
+    volume: 25,
+    enableLive: true,
+    disableEasing: true,
+});
+
+async () => {
+    // player.extractors.loadDefault();
+    player.use('YouTube', YouTubeExtractor);
+    player.use('Spotify', SpotifyExtractor);
+    player.use('AppleMusic', AppleMusicExtractor);
+}
+
+
+client.player = player;
+
+module.exports = client;
+
+fs.readdirSync('./src/lib/handlers').forEach((handler) => {
+    require(`./src/lib/handlers/${handler}`)(client);
+});
+
+client.login(process.env.CLIENT_TOKEN);

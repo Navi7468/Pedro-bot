@@ -1,0 +1,17 @@
+{
+  "name": "pedro-bot",
+  "version": "1.0.0",
+  "description": "Pedro!!!",
+  "main": "main.js",
+  "scripts": {
+    "start": "cls && node main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord-player": "^6.6.6",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1"
+  }
+}
