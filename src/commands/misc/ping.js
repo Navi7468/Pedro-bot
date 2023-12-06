@@ -4,8 +4,8 @@ module.exports = {
     name: 'ping',
     description: 'Pong!',
     type: ApplicationCommandType.ChatInput,
-    slash: async (client, interaction, serverDb) => {
-        interaction.reply({ content: 'Pong!', ephemeral: true });
+    slash: async (client, interaction) => {
+        interaction.reply({ content: 'Pong!', ephemeral: false });
     },
     chat: async (client, message) => {
         message.channel.send('Pong!');

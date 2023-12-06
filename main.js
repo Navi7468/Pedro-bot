@@ -36,6 +36,9 @@ client.chatCommands = new Collection();
 client.buttons = new Collection();
 client.selectMenus = new Collection();
 client.aliases = new Collection();
+client.config = {
+    "prefix": "!"
+}
 
 const player = new Player(client, {
     leaveOnEnd: false,
@@ -51,12 +54,13 @@ const player = new Player(client, {
     disableEasing: true,
 });
 
-async () => {
+(async function () {
+    console.log('Loading extractors...');
     // player.extractors.loadDefault();
-    player.use('YouTube', YouTubeExtractor);
-    player.use('Spotify', SpotifyExtractor);
-    player.use('AppleMusic', AppleMusicExtractor);
-}
+    player.extractors.register(YouTubeExtractor, {});
+    player.extractors.register(SpotifyExtractor, {});
+    player.extractors.register(AppleMusicExtractor, {});
+})();
 
 
 client.player = player;
