@@ -1,59 +1,57 @@
-const { EmbedBuilder, Collection, PermissionsBitField } = require("discord.js");
-const client = require("../../..");
-const ms = require("ms");
+const { EmbedBuilder, Collection, PermissionsBitField } = require('discord.js');
+// const ServerSchema = require('../../models/ServerSchema'); 
+const { chalk } = require('chalk');
+const client = require('../../..');
+const ms = require('ms');
 
 const cooldown = new Collection();
 
-client.on("messageCreate", async (message) => {
-    if (message.author.bot || message.channel.type !== 0) return;
+client.on('messageCreate', async message => {
+    if (message.author.bot) return;
 
-    const data = await client.config;
-    const prefix = data.prefix;
+    // const serverInfo = await ServerSchema.findOne({ guildID: message.guild.id });
+
+    const prefix = client.prefix;
     if (!message.content.startsWith(prefix)) return;
 
-    const args = message.content.slice(prefix.length).trim().split(/ +/g);
-    const cmd = args.shift().toLowerCase();
+    const args = message.content.slice(prefix.length).trim().split(/ +/);
+    const commandName = args.shift().toLowerCase();
 
-    if (!cmd) return;
-    let command = client.chatCommands.get(cmd);
-    if (!command) command = client.chatCommands.get(client.aliases.get(cmd));
-
+    const command = client.commands.get(commandName);
     if (!command) return;
-    if (!command.cooldown) {
-        CheckPermissions(command, message);
-        return command.chat(client, message, args);
-    }
-    const cooldownKey = `${command.name}${message.author.id}`;
-    if (cooldown.has(cooldownKey)) {
-        const cooldownTime = cooldown.get(cooldownKey);
-        const timeLeft = ms(cooldownTime - Date.now(), { long: true });
-        const cooldownEmbed = new EmbedBuilder()
-            .setDescription(`🚫 ${message.author}, You have to wait \`${timeLeft}\` before using this command again!`)
-            .setColor('Red');
-        return message.reply({ embeds: [cooldownEmbed] });
-    }
-    CheckPermissions(command, message);
-    command.chat(client, message, args);
+    if (!command.chat) return message.reply({ content: 'This command is not available as a chat command!' });
 
-    cooldown.set(cooldownKey, Date.now() + command.cooldown);
-    setTimeout(() => cooldown.delete(cooldownKey), command.cooldown);
+    try {
+        const cooldownKey = `${command.name}-${message.author.id}`;
+        if (command.cooldown) {
+            if (cooldown.has(cooldownKey)) {
+                const remainingTime = ms(cooldown.get(cooldownKey) - Date.now(), { long: true });
+                return message.reply(`🚫 You are on a ${remainingTime} cooldown!`);
+            }
+            cooldown.set(cooldownKey, Date.now() + command.cooldown);
+            setTimeout(() => cooldown.delete(cooldownKey), command.cooldown);
+        }
 
+        if (!hasRequiredPermissions(command, message)) return;
+
+        await command.chat(client, message, args);
+    } catch (error) {
+        console.error(error);
+        message.reply('There was an error trying to execute that command!');
+    }
 });
 
-async function CheckPermissions(command, message) {
-    if (command.userPerms || command.botPerms) {
-        if (!message.member.permissions.has(PermissionsBitField.resolve(command.userPerms || []))) {
-            const userPerms = new EmbedBuilder()
-                .setDescription(`🚫 ${message.author}, You don't have \`${command.userPerms}\` permissions to use this command!`)
-                .setColor('Red');
-            return message.reply({ embeds: [userPerms] });
-        }
+// Check if the user has the required permissions to run the command
+function hasRequiredPermissions(command, message) {
+    const missingUserPerms = command.userPerms && !message.member.permissions.has(PermissionsBitField.resolve(command.userPerms));
+    const missingBotPerms = command.botPerms && !message.guild.members.cache.get(client.user.id).permissions.has(PermissionsBitField.resolve(command.botPerms));
 
-        if (!message.guild.members.cache.get(client.user.id).permissions.has(PermissionsBitField.resolve(command.botPerms || []))) {
-            const botPerms = new EmbedBuilder()
-                .setDescription(`🚫 ${message.author}, I don't have \`${command.botPerms}\` permissions to use this command!`)
-                .setColor('Red');
-            return message.reply({ embeds: [botPerms] });
-        }
+    if (missingUserPerms || missingBotPerms) {
+        const embed = new EmbedBuilder()
+            .setColor('RED')
+            .setDescription(`🚫 ${message.author}, ${missingUserPerms ? `You don't have \`${command.userPerms}\` permissions` : `I don't have \`${command.botPerms}\` permissions`} to use this command!`);
+        message.reply({ embeds: [embed] });
+        return false;
     }
+    return true;
 }

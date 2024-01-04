@@ -1,18 +1,16 @@
-const { ApplicationCommandType, EmbedBuilder } = require('discord.js');
+const { ApplicationCommandType, EmbedBuilder, PermissionsBitField  } = require('discord.js');
 const fs = require('fs');
 
-async function embed(msg, command) {
-    // console.log(msg);
-    console.log(command);
-    const embed = new EmbedBuilder();
-    const commands = [];
+async function loadCommands() {
+    let commands = [];
+    const dirs = await fs.promises.readdir('./src/commands');
 
-    fs.readdirSync('./src/commands').forEach(async dir => {
-        const files = fs.readdirSync(`./src/commands/${dir}`).filter(file => file.endsWith('.js'));
-
-        files.forEach(async file => {
+    for (const dir of dirs) {
+        const files = await fs.promises.readdir(`./src/commands/${dir}`);
+        for (const file of files.filter(file => file.endsWith('.js'))) {
+            const command = require(`../../commands/${dir}/${file}`);
             let commandInfo = require(`../../commands/${dir}/${file}`);
-            commands.push({
+            commands.push({ 
                 name: commandInfo.name,
                 description: commandInfo.description,
                 type: commandInfo.type,
@@ -20,27 +18,26 @@ async function embed(msg, command) {
                 default_permission: commandInfo.default_permission ? commandInfo.default_permission : null,
                 default_member_permissions: commandInfo.default_member_permissions ? PermissionsBitField.resolve(commandInfo.default_member_permissions).toString() : null
             });
-        });
-    });
-    
-    commands.forEach(cmd => {
-        if (cmd.name == command) {
-            return embed.setTitle(`Help - ${cmd.name}`);
         }
-        return embed.setTitle('Help');
-    });
-    
-    // embed.setTitle('Help')
-    // embed.setTitle(`Help${command ? ` - ${command.name}` : ''}`)
+    }
+    return commands;
+}
 
+async function embed(msg, commandName) {
+    const commands = await loadCommands();
+    const embed = new EmbedBuilder()
 
-    if (command) {
-        commands.forEach(cmd => {
-            if (cmd.name == command) {
-                embed.addFields({ name: `${cmd.name}`, value: `${cmd.description}`, inline: true });
-            }
-        });     
+    if (commandName) {
+        const command = commands.find(cmd => cmd.name == commandName);
+        if (command) {
+            embed.setTitle(`Help - ${command.name}`);
+            embed.addFields({ name: `${command.name}`, value: `${command.description}`, inline: true });
+        } else {
+            embed.setTitle('Help - Command not found');
+            embed.setDescription(`No command found with the name \`${commandName}\``);
+        }
     } else {
+        embed.setTitle('Help - All Commands');
         commands.forEach(cmd => {
             embed.addFields({ name: `${cmd.name}`, value: `${cmd.description}`, inline: true });
         });
@@ -63,11 +60,11 @@ module.exports = {
     ],
     slash: async (client, interaction) => {
         const  command = interaction.options.getString('command') || null;
-        embed(interaction, command);
+        await embed(interaction, command);
         
     },
     chat: async (client, message) => {
         const command = message.content.split(' ').slice(1).join(' ') || null;
-        embed(message, command);
+        await embed(message, command);
     }
 }

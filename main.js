@@ -31,14 +31,14 @@ const client = new Client({
     ]
 });
 
-client.slashCommands = new Collection();
-client.chatCommands = new Collection();
+// client.slashCommands = new Collection();
+// client.chatCommands = new Collection();
+client.commands = new Collection();
 client.buttons = new Collection();
 client.selectMenus = new Collection();
 client.aliases = new Collection();
-client.config = {
-    "prefix": "!"
-}
+client.prefix = "!";
+client.config = {};
 
 const player = new Player(client, {
     leaveOnEnd: false,
@@ -49,7 +49,7 @@ const player = new Player(client, {
         quality: 'highestaudio',
         highWaterMark: 1 << 25,
     },
-    volume: 25,
+    volume: 5,
     enableLive: true,
     disableEasing: true,
 });
@@ -67,8 +67,8 @@ client.player = player;
 
 module.exports = client;
 
-fs.readdirSync('./src/lib/handlers').forEach((handler) => {
-    require(`./src/lib/handlers/${handler}`)(client);
+fs.readdirSync('./src/handlers').forEach((handler) => {
+    require(`./src/handlers/${handler}`)(client);
 });
 
 client.login(process.env.CLIENT_TOKEN);

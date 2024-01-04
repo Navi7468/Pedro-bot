@@ -1,0 +1,32 @@
+const { ApplicationCommandType } = require("discord.js");
+
+module.exports = {
+    name: "example",
+    description: "Example command",
+    type: ApplicationCommandType.ChatInput,
+    options: [
+        {
+            name: "example-option",
+            description: "Example option",
+            type: 3,
+            required: true,
+        },
+    ],
+    default_permission: [],
+    default_member_permissions: [],
+    cooldown: 0,
+    aliases: [],
+    autocomplete: async (interaction, choices) => {
+        choices.push({
+            name: "example-option",
+            value: "example-option",
+        });
+        await interaction.respond({ choices: choices });
+    },
+    slash: async (client, interaction) => {
+        interaction.reply({ content: "Example command!", ephemeral: false });
+    },
+    chat: async (client, message) => {
+        message.channel.send("Example command!");
+    },
+};

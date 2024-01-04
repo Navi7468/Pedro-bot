@@ -1,4 +1,4 @@
-const { ApplicationCommandType, EmbedBuilder } = require('discord.js');
+const { ApplicationCommandType } = require('discord.js');
 
 module.exports = {
     name: 'ping',
