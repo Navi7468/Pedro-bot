@@ -13,7 +13,7 @@ module.exports = (client) => {
     fs.readdirSync('./src/events').forEach(async (dir) => {
         const files = fs.readdirSync(`./src/events/${dir}`).filter((file) => file.endsWith('.js'));
         files.forEach(async (file) => {
-            let event = require(`../../events/${dir}/${file}`);
+            let event = require(`../events/${dir}/${file}`);
             if (event) {
                 events.push(event);
                 categoryRows.push({ dirName: dir, fileName: file, status: chalk.green('✅') });
