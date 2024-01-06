@@ -1,6 +1,5 @@
 const { EmbedBuilder, Collection, PermissionsBitField } = require('discord.js');
-// const ServerSchema = require('../../models/ServerSchema'); 
-const { chalk } = require('chalk');
+const logger = require('../../util/logger');
 const client = require('../../..');
 const ms = require('ms');
 
@@ -9,8 +8,6 @@ const cooldown = new Collection();
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
-    // const serverInfo = await ServerSchema.findOne({ guildID: message.guild.id });
-
     const prefix = client.prefix;
     if (!message.content.startsWith(prefix)) return;
 
@@ -18,7 +15,7 @@ client.on('messageCreate', async message => {
     const commandName = args.shift().toLowerCase();
 
     const command = client.commands.get(commandName);
-    if (!command) return;
+    if (!command) return logger.info(`Unrecognized command (${commandName}) from ${message.author.tag} in ${message.guild.name} (${message.guild.id})`);
     if (!command.chat) return message.reply({ content: 'This command is not available as a chat command!' });
 
     try {
@@ -36,7 +33,7 @@ client.on('messageCreate', async message => {
 
         await command.chat(client, message, args);
     } catch (error) {
-        console.error(error);
+        logger.error(`Error executing command '${command.name}': ${error.message}`);
         message.reply('There was an error trying to execute that command!');
     }
 });

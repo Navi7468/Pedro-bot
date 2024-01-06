@@ -1,5 +1,5 @@
 const { ApplicationCommandType, EmbedBuilder } = require('discord.js');
-const { useQueue } = require("discord-player");
+const { useQueue } = require('discord-player');
 
 module.exports = {
     name: 'stop',
@@ -21,7 +21,7 @@ async function stopSong(client, interactionOrMessage) {
 
     try {
         const queue = useQueue(interactionOrMessage.guild.id);
-        
+
         if (!queue) {
             return interactionOrMessage.reply('There is no song playing.');
         }

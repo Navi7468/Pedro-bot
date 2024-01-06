@@ -9,7 +9,7 @@ var table = new AsciiTable("Events")
 module.exports = (client) => {
     const events = [];
     let categoryRows = [];
-    
+
     fs.readdirSync('./src/events').forEach(async (dir) => {
         const files = fs.readdirSync(`./src/events/${dir}`).filter((file) => file.endsWith('.js'));
         files.forEach(async (file) => {
@@ -29,5 +29,5 @@ module.exports = (client) => {
         });
     }
 
-console.log(chalk.greenBright(table.toString()));
+    console.log(chalk.hex('#ff0000')(table.toString()));
 }

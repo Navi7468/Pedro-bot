@@ -1,10 +1,16 @@
 const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
-const { Player, GuildQueue } = require('discord-player');
 const { YouTubeExtractor, SpotifyExtractor, AppleMusicExtractor } = require('@discord-player/extractor');
-// const mongoose = require('mongoose');
+const { Player, GuildQueue } = require('discord-player');
+const logger = require('./src/util/logger');
+const chalk = require('chalk');
 
 const fs = require('fs');
 require('dotenv').config();
+
+if (!process.env.CLIENT_TOKEN) {
+    logger.error('CLIENT_TOKEN is not defined in the .env file!');
+    process.exit(1);
+}
 
 const client = new Client({
     intents: [
@@ -31,8 +37,6 @@ const client = new Client({
     ]
 });
 
-// client.slashCommands = new Collection();
-// client.chatCommands = new Collection();
 client.commands = new Collection();
 client.buttons = new Collection();
 client.selectMenus = new Collection();
@@ -55,20 +59,25 @@ const player = new Player(client, {
 });
 
 (async function () {
-    console.log('Loading extractors...');
-    // player.extractors.loadDefault();
+    console.log(chalk.green('Loading extractors...'));
     player.extractors.register(YouTubeExtractor, {});
     player.extractors.register(SpotifyExtractor, {});
     player.extractors.register(AppleMusicExtractor, {});
+    console.log(chalk.greenBright('Loaded extractors!'));
 })();
-
-
 client.player = player;
 
 module.exports = client;
 
-fs.readdirSync('./src/handlers').forEach((handler) => {
-    require(`./src/handlers/${handler}`)(client);
-});
+try {
+    fs.readdirSync('./src/handlers').forEach((handler) => {
+        require(`./src/handlers/${handler}`)(client);
+    });
+} catch (error) {
+    logger.error(`Error loading handlers: ${error.message}`);
+}
 
-client.login(process.env.CLIENT_TOKEN);
+client.login(process.env.CLIENT_TOKEN).catch((error) => {
+    logger.error(`Error logging in: ${error.message}`);
+    process.exit(1);
+});

@@ -1,5 +1,5 @@
 const { ApplicationCommandType } = require('discord.js');
-const { useQueue } = require("discord-player");
+const { useQueue } = require('discord-player');
 
 module.exports = {
     name: 'pause',
@@ -37,7 +37,7 @@ async function pauseSong(client, interactionOrMessage) {
         queue.node.setPaused(true);
         console.log(currentTrack);
         interactionOrMessage.reply(`🎶 Paused **${currentTrack.title}**`);
-        
+
     } catch (error) {
         console.error('Error pausing the song:', error);
         interactionOrMessage.reply('There was an error trying to pause the song.');

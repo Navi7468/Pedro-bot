@@ -1,9 +1,9 @@
-const { Routes } = require("discord-api-types/v9");
-const { REST } = require("@discordjs/rest");
-const AsciiTable = require("ascii-table");
-const chalk = require("chalk");
-const path = require("path");
-const fs = require("fs");
+const { Routes, REST } = require('discord.js');
+const AsciiTable = require('ascii-table');
+const logger = require('../util/logger');
+const chalk = require('chalk');
+const path = require('path');
+const fs = require('fs');
 
 const testing = process.env.TESTING === "true" ? true : false;
 const TOKEN = testing ? process.env.TESTING_TOKEN : process.env.CLIENT_TOKEN;
@@ -71,12 +71,21 @@ module.exports = async (client) => {
 
     const rest = new REST({ version: "9" }).setToken(TOKEN);
     try {
-        console.log(chalk.blue("Started refreshing application (/) commands."));
+        console.log(chalk.yellow("Started refreshing application (/) commands."));
         await rest.put(
             Routes.applicationGuildCommands(CLIENT_ID, "1191973790553493514"),
             { body: formattedCommands }
         );
-        console.log(chalk.green("Successfully reloaded application (/) commands."));
+        console.log(chalk.hex("#FFA500")("Main server commands refreshed."));
+
+        await rest.put(
+            Routes.applicationGuildCommands(CLIENT_ID, "1179111925657903185"),
+            { body: formattedCommands }
+        );
+        // orange
+        console.log(chalk.hex("#FFA500")("Testing server commands refreshed."));
+
+        console.log(chalk.greenBright("Successfully reloaded application (/) commands."));
     } catch (error) {
         console.error(chalk.red("Failed to reload application (/) commands:"), error);
     }

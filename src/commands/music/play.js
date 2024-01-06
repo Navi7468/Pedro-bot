@@ -1,5 +1,5 @@
 const { ApplicationCommandType, EmbedBuilder } = require('discord.js');
-const { useQueue } = require("discord-player");
+const { useQueue } = require('discord-player');
 
 module.exports = {
     name: 'play',

@@ -1,22 +1,21 @@
 const { EmbedBuilder, Collection, PermissionsBitField } = require('discord.js');
-const { chalk } = require('chalk');
+const logger = require('../../util/logger');
 const client = require('../../..');
 const ms = require('ms');
 
 const cooldown = new Collection();
 
 client.on('interactionCreate', async interaction => {
-    // console.log(interaction.type);
     const command = client.commands.get(interaction.commandName);
     if (!command) return client.commands.delete(interaction.commandName);
-    
+
     if (interaction.isAutocomplete()) {
         if (command.autocomplete) {
             const choices = [];
             await command.autocomplete(interaction, choices);
         }
     }
-    
+
     if (!interaction.isCommand()) return;
     try {
         const cooldownKey = `${command.name}-${interaction.user.id}`;
@@ -33,7 +32,9 @@ client.on('interactionCreate', async interaction => {
 
         if (command.slash) {
             await command.slash(client, interaction);
+            logger.info(`Executed slash command '${command.name}' by ${interaction.user.tag} in guild ${interaction.guildId}`);
         } else {
+            logger.error(`Error executing command '${command.name}': ${error.message}`);
             await interaction.reply({ content: 'This command is not available as a slash command!' });
         }
     } catch (error) {

@@ -1,5 +1,5 @@
 const { ApplicationCommandType, EmbedBuilder } = require('discord.js');
-const { useQueue } = require("discord-player");
+const { useQueue } = require('discord-player');
 
 module.exports = {
     name: 'skip',
@@ -23,7 +23,7 @@ async function skipSong(client, interactionOrMessage) {
         const queue = useQueue(interactionOrMessage.guild.id);
         const tracks = queue.tracks.toArray();
         const currentTrack = queue.currentTrack;
-        
+
         if (!queue) {
             return interactionOrMessage.reply('There is no song playing.');
         }
