@@ -34,7 +34,7 @@ async function pauseSong(client, interactionOrMessage) {
             return interactionOrMessage.reply('The song is already paused.');
         }
 
-        queue.node.setPaused(true);
+        queue.queue.node.isPaused().setPaused(true);
         console.log(currentTrack);
         interactionOrMessage.reply(`🎶 Paused **${currentTrack.title}**`);
 

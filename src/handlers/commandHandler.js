@@ -82,7 +82,6 @@ module.exports = async (client) => {
             Routes.applicationGuildCommands(CLIENT_ID, "1179111925657903185"),
             { body: formattedCommands }
         );
-        // orange
         console.log(chalk.hex("#FFA500")("Testing server commands refreshed."));
 
         console.log(chalk.greenBright("Successfully reloaded application (/) commands."));

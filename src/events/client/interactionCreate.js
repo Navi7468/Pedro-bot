@@ -31,14 +31,15 @@ client.on('interactionCreate', async interaction => {
         if (!await hasRequiredPermissions(command, interaction)) return;
 
         if (command.slash) {
+            logger.info(`Executed slash command '${command.name}' by ${interaction.user.tag} in guild ${interaction.guild.name} (${interaction.guild.id})`);
             await command.slash(client, interaction);
-            logger.info(`Executed slash command '${command.name}' by ${interaction.user.tag} in guild ${interaction.guildId}`);
         } else {
             logger.error(`Error executing command '${command.name}': ${error.message}`);
             await interaction.reply({ content: 'This command is not available as a slash command!' });
         }
     } catch (error) {
-        console.error(error);
+        logger.error(`Error executing command '${command.name}': ${error.message}`);
+        await interaction.reply({ content: 'There was an error trying to execute that command!', ephemeral: true });
     }
 });
 

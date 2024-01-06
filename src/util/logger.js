@@ -1,9 +1,12 @@
 const winston = require('winston');
 const { combine, timestamp, printf, colorize } = winston.format;
-
-const fs = require('fs');
+const chalk = require('chalk');
+const fs = require('fs').promises;
 const path = require('path');
 const logDir = './logs';
+
+// Ensure log directory exists
+fs.mkdir(logDir, { recursive: true }).catch(console.error);
 
 const logFormat = printf(({ level, message, timestamp }) => {
     return `[${timestamp}] ${level}: ${message}`;
@@ -25,8 +28,6 @@ const logger = winston.createLogger({
 
 // Clear logs folder every 7 days
 (async function () {
-
-
     fs.readdir(logDir, (err, files) => {
         if (err) throw err;
 
