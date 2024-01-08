@@ -37,7 +37,11 @@ async function handlePlayCommand(client, interactionOrMessage, songQuery) {
             metadata: {
                 channel: interactionOrMessage
             },
-            requestedBy: interactionOrMessage.user
+            requestedBy: interactionOrMessage.user,
+            volume: 25,
+            leaveOnEnd: false,
+            leaveOnStop: false,
+            leaveOnEmpty: true
         });
 
         if (track) {
@@ -62,7 +66,7 @@ function sendTrackEmbed(interactionOrMessage, track, isNowPlaying) {
 
     ['artist', 'album', 'duration'].forEach(field => {
         if (track[field]) {
-            embed.addFields({ name: field.charAt(0).toUpperCase() + field.slice(1), value: track[field], inline: true });
+            embed.addFields({ name: `${field.charAt(0).toUpperCase()}${field.slice(1)}`, value: track[field], inline: true });
         }
     });
 

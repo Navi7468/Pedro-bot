@@ -31,11 +31,13 @@ const serverSchema = new mongoose.Schema({
     prefix: { type: String, default: '!' },
     events: {
         memberJoin: EventSettingsSchema,
-        memberLeave: EventSettingsSchema
+        memberLeave: EventSettingsSchema,
+        birthday: EventSettingsSchema
     },
     roles: {
         birthdayRole: RoleSchema,
         muteRole: RoleSchema,
+        botRole: RoleSchema,
         autoRoles: [RoleSchema],
         selfRoles: [{ name: String, reactionId: String, roles: [RoleSchema] }]
     },

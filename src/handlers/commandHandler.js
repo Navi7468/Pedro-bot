@@ -3,7 +3,7 @@ const AsciiTable = require('ascii-table');
 const logger = require('../util/logger');
 const chalk = require('chalk');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs').promises;
 
 const testing = process.env.TESTING === "true" ? true : false;
 const TOKEN = testing ? process.env.TESTING_TOKEN : process.env.CLIENT_TOKEN;
@@ -16,16 +16,18 @@ module.exports = async (client) => {
     const commands = [];
     let categoryRows = [];
 
-    const readCommands = (dir, baseDir = "") => {
-        const files = fs.readdirSync(path.join(__dirname, dir));
+    const readCommands = async (dir, baseDir = "") => {
+        const files = await fs.readdir(path.resolve(dir));
 
         for (const file of files) {
-            const stat = fs.lstatSync(path.join(__dirname, dir, file));
+            const fullPath = path.resolve(dir, file);
+            const stat = await fs.lstat(fullPath);
+
             if (stat.isDirectory()) {
-                readCommands(path.join(dir, file), baseDir + file);
+                await readCommands(path.join(dir, file), baseDir + file);
             } else if (file.endsWith(".js")) {
                 try {
-                    const command = require(path.join(__dirname, dir, file));
+                    const command = require(fullPath);
                     commands.push({
                         name: command.name,
                         description: command.description,
@@ -46,18 +48,13 @@ module.exports = async (client) => {
                         chalk.red(`Error loading command ${file}:`),
                         error
                     );
-                    categoryRows.push({
-                        dirName: baseDir,
-                        fileName: file,
-                        isChatCommand: false,
-                        isSlashCommand: false,
-                    });
+                    process.exit(1); // Exit process if a command fails to load
                 }
             }
         }
     };
 
-    readCommands("../commands");
+    await readCommands("./src/commands");
 
     // Convert BigInt values in permissions to strings
     const formattedCommands = commands.map(cmd => ({
@@ -71,22 +68,10 @@ module.exports = async (client) => {
 
     const rest = new REST({ version: "9" }).setToken(TOKEN);
     try {
-        console.log(chalk.yellow("Started refreshing application (/) commands."));
-        await rest.put(
-            Routes.applicationGuildCommands(CLIENT_ID, "1191973790553493514"),
-            { body: formattedCommands }
-        );
-        console.log(chalk.hex("#FFA500")("Main server commands refreshed."));
-
-        await rest.put(
-            Routes.applicationGuildCommands(CLIENT_ID, "1179111925657903185"),
-            { body: formattedCommands }
-        );
-        console.log(chalk.hex("#FFA500")("Testing server commands refreshed."));
-
-        console.log(chalk.greenBright("Successfully reloaded application (/) commands."));
+        await rest.put( Routes.applicationCommands(CLIENT_ID), { body: formattedCommands });
+        logger.info(`Successfully loaded application commands.`);    
     } catch (error) {
-        console.error(chalk.red("Failed to reload application (/) commands:"), error);
+        logger.error(`Failed to reload application (/) commands: ${error}`);
     }
 };
 
@@ -94,18 +79,18 @@ function formatRows(rows) {
     const markColumnWidth = 7;  // Width of the Chat and Slash columns
     let currentDir = "";
 
+    // Function to center marks within their column width
+    const centerMark = (mark) => mark.padStart((markColumnWidth + mark.length) / 2).padEnd(markColumnWidth, ' ');
+
     // Apply centered headings for Chat and Slash, left-aligned for Command
     const commandHeading = 'Command'.padEnd(markColumnWidth, ' ');
-    const chatHeading = 'Chat'.padStart(markColumnWidth / 2, ' ').padEnd(markColumnWidth, ' ');
-    const slashHeading = 'Slash'.padStart(markColumnWidth / 2, ' ').padEnd(markColumnWidth, ' ');
+    const chatHeading = centerMark('Chat');
+    const slashHeading = centerMark('Slash');
     table.setHeading(commandHeading, chatHeading, slashHeading);
 
     rows.forEach((row, index) => {
-        // Center the marks within their column width
-        let chatLoaded = row.isChatCommand ? '✅' : '❌';
-        let slashLoaded = row.isSlashCommand ? '✅' : '❌';
-        chatLoaded = chatLoaded.padStart((markColumnWidth + chatLoaded.length) / 2).padEnd(markColumnWidth, ' ');
-        slashLoaded = slashLoaded.padStart((markColumnWidth + slashLoaded.length) / 2).padEnd(markColumnWidth, ' ');
+        let chatLoaded = centerMark(row.isChatCommand ? '✅' : '❌');
+        let slashLoaded = centerMark(row.isSlashCommand ? '✅' : '❌');
 
         // Handle new category
         if (row.dirName !== currentDir) {
@@ -119,7 +104,7 @@ function formatRows(rows) {
 
         // Determine the prefix for the command row, left-aligned
         const prefix = (index === rows.length - 1 || (rows[index + 1] && rows[index + 1].dirName !== currentDir)) ? '└─ ' : '├─ ';
-        const fileName = prefix + row.fileName.padEnd(markColumnWidth - prefix.length, ' ');
+        const fileName = `${prefix}${row.fileName.padEnd(markColumnWidth - prefix.length, ' ')}`;
 
         // Add the command row with centered marks
         table.addRow(fileName, chatLoaded, slashLoaded);

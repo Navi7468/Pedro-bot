@@ -1,12 +1,11 @@
 {
   "name": "pedro-bot",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Pedro!!!",
   "main": "main.js",
   "scripts": {
     "start": "cls && node main.js",
-    "test": "cls && jest",
-    "coverage": "cls && jest --coverage"
+    "start:pi": "clear && node main.js"
   },
   "keywords": [],
   "author": "Navi7468",
@@ -20,12 +19,11 @@
     "discord-player": "^6.6.6",
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
+    "moment-timezone": "^0.5.44",
     "mongoose": "^8.0.3",
     "ms": "^2.1.3",
+    "node-cron": "^3.0.3",
     "winston": "^3.11.0",
     "ytdl-core": "^4.11.5"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0"
   }
 }

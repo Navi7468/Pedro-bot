@@ -17,7 +17,8 @@ const botSchema = new mongoose.Schema({
     defaults: {
         prefix: { type: String, default: '!' },
         volume: { type: Number, default: 10 },
-        language: { type: String, default: 'en' }
+        language: { type: String, default: 'en' },
+        timezone: { type: String, default: 'America/Los_Angeles' }
     },
     __v: { type: Number, default: 0 }
 }, { timestamps: true });
