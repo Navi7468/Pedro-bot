@@ -2,6 +2,7 @@ const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js'
 const { YouTubeExtractor, SpotifyExtractor, AppleMusicExtractor } = require('@discord-player/extractor');
 const { Player, GuildQueue } = require('discord-player');
 const logger = require('./src/util/logger');
+const mongoose = require('mongoose');
 const chalk = require('chalk');
 
 const fs = require('fs');
@@ -79,5 +80,16 @@ try {
 
 client.login(process.env.CLIENT_TOKEN).catch((error) => {
     logger.error(`Error logging in: ${error.message}`);
+    process.exit(1);
+});
+
+mongoose.connect(process.env.MONGO_URI, {
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true,
+    // useFindAndModify: false
+}).then(() => {
+    logger.info('Connected to MongoDB!');
+}).catch((error) => {
+    logger.error(`Error connecting to MongoDB: ${error.message}`);
     process.exit(1);
 });

@@ -5,7 +5,7 @@ client.on('interactionCreate', async interaction => {
     if (!interaction.isButton()) return;
 
     const button = client.buttons.get(interaction.customId);
-    if (!button) return;
+    if (!button) return console.log(`No button found for ${interaction.customId}`);
 
     try {
         if (button.permissions) {
