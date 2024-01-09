@@ -21,6 +21,8 @@ module.exports = {
         }
     ],
     autocomplete: async (interaction, choices) => {
+        console.log("autocomplete for loop");
+        
         modes.forEach((mode, index) => {
             choices.push({
                 name: mode,
