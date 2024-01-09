@@ -1,5 +1,4 @@
 const { ApplicationCommandType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField, ApplicationCommandPermissionType } = require('discord.js');
-const userConfigs = require('../../../configs/users.json');
 const userSchema = require('../../models/userSchema');
 const colorNameToHex = require('colornames'); 
 const logger = require('../../util/logger');
