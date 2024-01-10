@@ -3,7 +3,7 @@ const { useQueue, useMainPlayer } = require('discord-player');
 const logger = require('utils/logger');
 
 module.exports = {
-    name: 'playsong',
+    name: 'play',
     description: 'Plays a song from YouTube, Spotify, or Apple Music.',
     type: ApplicationCommandType.ChatInput,
     options: [
@@ -31,7 +31,7 @@ module.exports = {
         results.tracks.forEach((track, index) => {
             choices.push({
                 name: track.title,
-                value: index.toString()
+                value: track.title
             });
         });
 
