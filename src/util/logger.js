@@ -1,6 +1,5 @@
 const winston = require('winston');
 const { combine, timestamp, printf, colorize } = winston.format;
-const chalk = require('chalk');
 const fs = require('fs').promises;
 const path = require('path');
 const logDir = './logs';

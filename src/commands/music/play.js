@@ -1,6 +1,6 @@
 const { ApplicationCommandType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { useQueue, useMainPlayer } = require('discord-player');
-const logger = require('../../util/logger');
+const logger = require('utils/logger');
 
 module.exports = {
     name: 'playsong',
@@ -25,7 +25,7 @@ module.exports = {
     autocomplete: async (interaction, choices) => {
         const player = useMainPlayer();
         const query = interaction.options.getString('song');
-        if (!query) return; 
+        if (!query) return;
 
         const results = await player.search(query);
         results.tracks.forEach((track, index) => {
@@ -34,7 +34,7 @@ module.exports = {
                 value: index.toString()
             });
         });
-        
+
         await interaction.respond(choices).catch(console.error);
     },
     slash: async (client, interaction) => {

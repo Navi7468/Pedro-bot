@@ -1,16 +1,16 @@
 const { ActivityType } = require("discord.js");
-const botSchema = require('../../models/botSchema');
-const userSchema = require('../../models/userSchema');
-const serverSchema = require('../../models/serverSchema');
-const logger = require('../../util/logger');
 const moment = require('moment-timezone');
 const cron = require('node-cron');
-const client = require('../../..');
+
+const { botSchema, serverSchema, userSchema } = require('models')
+const logger = require('utils/logger');
+const client = require('client');
+
 
 client.on('ready', async () => {
     logger.info(`Logged in as ${client.user.tag}!`);
 
-    const bot = await botSchema.findOne();
+    const bot = await botSchema.findOne({});
     if (!bot) return logger.error('Bot does not exist in the database');
 
     const activities = {
@@ -38,7 +38,7 @@ client.on('ready', async () => {
 async function checkBirthdays(bot) {
     const timezone = bot.defaults.timezone;
     const today = moment().tz(timezone).format('MM-DD');
-    
+
     const usersWithBirthday = await userSchema.find({ birthday: { $exists: true } });
     if (!usersWithBirthday) return logger.info('There are no users with birthdays');
 

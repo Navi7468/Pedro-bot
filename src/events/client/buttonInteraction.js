@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionsBitField } = require('discord.js');
+const { hasRequiredPermissions } = require('utils/commandHelpers');
 const client = require("../../..")
 
 client.on('interactionCreate', async interaction => {
@@ -9,12 +9,7 @@ client.on('interactionCreate', async interaction => {
 
     try {
         if (button.permissions) {
-            if (!interaction.memberPermissions.has(PermissionsBitField.resolve(button.permissions || []))) {
-                const perms = new EmbedBuilder()
-                    .setDescription(`🚫 ${interaction.user}, You don't have \`${button.permissions}\` permissions to interact this button!`)
-                    .setColor('Red')
-                return interaction.reply({ embeds: [perms], ephemeral: true })
-            }
+            if (!hasRequiredPermissions(button, interaction)) return;
         }
         await button.run(client, interaction);
     } catch (error) {

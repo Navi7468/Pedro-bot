@@ -1,8 +1,7 @@
 const { ApplicationCommandType, EmbedBuilder } = require('discord.js');
-const logger = require('../../util/logger');
-const botSchema = require('../../models/botSchema');
-const serverSchema = require('../../models/serverSchema');
-const userSchema = require('../../models/userSchema');
+
+const { botSchema, serverSchema, userSchema } = require('models')
+const logger = require('utils/logger')
 
 module.exports = {
     name: 'testing',
@@ -14,7 +13,22 @@ module.exports = {
             return interaction.reply({ content: 'You are not allowed to use this command!' });
         }
 
-        const guild = interaction.guild;
-        
+        try {
+            const guild = interaction.guild;
+            logger.info(`[TESTING COMMAND] ${interaction.user.globalName} used the command in ${guild.name} (${guild.id})`);
+            interaction.reply({ content: 'Testing command', ephemeral: false });
+        } catch (error) {
+            logger.error(`[TESTING COMMAND] Error: ${error.message}`);
+            interaction.reply({ content: 'Testing command error', ephemeral: true });
+        }
+    },
+    chat: async (client, message) => {
+        try {
+            message.channel.send('Testing command');
+        } catch (error) {
+            console.error(error);
+            logger.error(`[TESTING COMMAND] Error: ${error.message}`);
+            message.channel.send('Testing command error');
+        }
     }
 }

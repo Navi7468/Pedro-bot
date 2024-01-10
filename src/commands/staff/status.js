@@ -1,6 +1,6 @@
 const { ApplicationCommandType, PermissionsBitField, ActivityType, EmbedBuilder } = require('discord.js');
-const botSchema = require('../../models/botSchema');
-const logger = require('../../util/logger');
+const botSchema = require('models/botSchema');
+const logger = require('utils/logger');
 
 module.exports = {
     name: 'status',
@@ -78,7 +78,7 @@ module.exports = {
         const bot = await botSchema.findOne({});
 
         logger.info(`${interaction.user.tag} tried to change the bot's status to '${status}' and activity to '${activityType}' with text '${text}'`);
-        
+
         let responseMessages = [];
 
         if (status) {
@@ -103,7 +103,7 @@ module.exports = {
                 STREAMING: ActivityType.Streaming,
                 WATCHING: ActivityType.Watching,
             };
-            
+
             client.user.setActivity({ name: bot.activity.name, type: activities[bot.activity.type] });
             responseMessages.push(`Set activity to \`${bot.activity.type}\` with text \`${bot.activity.name}\``);
         }

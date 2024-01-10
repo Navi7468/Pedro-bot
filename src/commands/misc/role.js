@@ -1,8 +1,9 @@
 const { ApplicationCommandType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField, ApplicationCommandPermissionType } = require('discord.js');
-const userSchema = require('../../models/userSchema');
-const colorNameToHex = require('colornames'); 
-const logger = require('../../util/logger');
+const colorNameToHex = require('colornames');
 const fs = require('fs');
+
+const userSchema = require('models/userSchema');
+const logger = require('utils/logger');
 
 module.exports = {
     name: 'role',
@@ -41,7 +42,7 @@ module.exports = {
     },
     slash: async (client, interaction) => {
 
-        /* Testing */ 
+        /* Testing */
         // if (interaction.user.id !== '900835160986099744') {
         //     logger.info(`[ROLES COMMAND] ${interaction.user.globalName} attempted to use the command while in testing.`);
         //     return interaction.reply({ content: 'This command is currently disabled.', ephemeral: true });
@@ -49,9 +50,9 @@ module.exports = {
 
         const userProfile = await userSchema.findOne({ userId: interaction.user.id });
         const userGuildRole = userProfile?.guildRole?.find(role => role.guildId === interaction.guild.id);
-        
+
         let role;
-        
+
         if (userGuildRole) {
             const guildRole = interaction.guild.roles.cache.get(userGuildRole.roleId);
             role = {
@@ -61,7 +62,7 @@ module.exports = {
                 position: guildRole.position
             }
         }
-        
+
         const colorInput = interaction.options.getString('color').trim();
         let hexColor;
 
@@ -82,12 +83,12 @@ module.exports = {
         } else if (colorTypes.colorName.test(colorInput)) {
             hexColor = colorNameToHex(colorInput);
         }
-        
+
         if (!hexColor) {
             return interaction.reply({ content: 'Invalid color format!', ephemeral: true });
         }
         logger.info(`[ROLES COMMAND] ${interaction.user.globalName} requested the color ${colorInput} (${hexColor})`);
-        
+
 
         try {
             let roleName = interaction.options.getString('name')?.trim() || userGuildRole?.roleName || interaction.user.globalName || interaction.user.username;
@@ -123,8 +124,8 @@ module.exports = {
 function confirmRole(interaction, role, isNewRole) {
     const oldRole = !isNewRole ? interaction.guild.roles.cache.get(role.id) : null;
 
-    const roleNameChange = oldRole && oldRole.name !== role.name 
-        ? `\`${oldRole.name}\` to \`${role.name}\`` 
+    const roleNameChange = oldRole && oldRole.name !== role.name
+        ? `\`${oldRole.name}\` to \`${role.name}\``
         : `\`${role.name}\``;
 
     const embedTitle = `Role ${isNewRole ? 'Creation' : 'Update'}`;
@@ -158,7 +159,7 @@ function confirmRole(interaction, role, isNewRole) {
     };
 
     const collector = interaction.channel.createMessageComponentCollector({ filter, time: 60000 });
-    
+
     collector.on('collect', async (i) => {
         if (i.customId.startsWith('confirm')) {
             try {
@@ -183,7 +184,7 @@ function confirmRole(interaction, role, isNewRole) {
 
                 // Update user profile's guildRole
                 // console.log(newRole);
-                
+
                 const updatedRoleInfo = {
                     guildId: guildId,
                     roleId: newRole.id,

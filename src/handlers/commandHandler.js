@@ -1,6 +1,6 @@
 const { Routes, REST } = require('discord.js');
 const AsciiTable = require('ascii-table');
-const logger = require('../util/logger');
+const logger = require('utils/logger');
 const chalk = require('chalk');
 const path = require('path');
 const fs = require('fs').promises;
@@ -68,8 +68,8 @@ module.exports = async (client) => {
 
     const rest = new REST({ version: "9" }).setToken(TOKEN);
     try {
-        await rest.put( Routes.applicationCommands(CLIENT_ID), { body: formattedCommands });
-        logger.info(`Successfully loaded application commands.`);    
+        await rest.put(Routes.applicationCommands(CLIENT_ID), { body: formattedCommands });
+        logger.info(`Successfully loaded application commands.`);
     } catch (error) {
         logger.error(`Failed to reload application (/) commands: ${error}`);
     }

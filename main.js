@@ -1,12 +1,13 @@
 const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
 const { YouTubeExtractor, SpotifyExtractor, AppleMusicExtractor } = require('@discord-player/extractor');
 const { Player, GuildQueue } = require('discord-player');
-const logger = require('./src/util/logger');
+require('module-alias/register');
 const mongoose = require('mongoose');
 const chalk = require('chalk');
-
-const fs = require('fs');
 require('dotenv').config();
+const fs = require('fs');
+
+const logger = require('utils/logger');
 
 if (!process.env.CLIENT_TOKEN) {
     logger.error('CLIENT_TOKEN is not defined in the .env file!');
@@ -42,8 +43,6 @@ client.commands = new Collection();
 client.buttons = new Collection();
 client.selectMenus = new Collection();
 client.aliases = new Collection();
-client.prefix = "!";
-client.config = {};
 
 const player = new Player(client, {
     leaveOnEnd: false,
