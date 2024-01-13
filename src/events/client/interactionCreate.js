@@ -1,5 +1,5 @@
-const { logger, checkCooldown, hasRequiredPermissions } = require('utils');
-const client = require('client');
+const { logger, checkCooldown, hasRequiredPermissions } = require('@utils');
+const client = require('@client');
 
 client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand() && !interaction.isAutocomplete()) return;

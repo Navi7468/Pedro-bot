@@ -2,9 +2,9 @@ const { ActivityType } = require("discord.js");
 const moment = require('moment-timezone');
 const cron = require('node-cron');
 
-const { botSchema, serverSchema, userSchema } = require('models')
-const logger = require('utils/logger');
-const client = require('client');
+const { botSchema, serverSchema, userSchema } = require('@models')
+const logger = require('@utils/logger');
+const client = require('@client');
 
 
 client.on('ready', async () => {

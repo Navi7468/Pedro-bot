@@ -1,6 +1,6 @@
 const { ApplicationCommandType, PermissionsBitField, ActivityType, EmbedBuilder } = require('discord.js');
-const botSchema = require('models/botSchema');
-const logger = require('utils/logger');
+const botSchema = require('@models/botSchema');
+const logger = require('@utils/logger');
 
 module.exports = {
     name: 'status',

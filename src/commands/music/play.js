@@ -1,6 +1,6 @@
 const { ApplicationCommandType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { useQueue, useMainPlayer } = require('discord-player');
-const logger = require('utils/logger');
+const logger = require('@utils/logger');
 
 module.exports = {
     name: 'play',

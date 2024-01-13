@@ -7,7 +7,7 @@ const chalk = require('chalk');
 require('dotenv').config();
 const fs = require('fs');
 
-const logger = require('utils/logger');
+const logger = require('@utils/logger');
 
 if (!process.env.CLIENT_TOKEN) {
     logger.error('CLIENT_TOKEN is not defined in the .env file!');

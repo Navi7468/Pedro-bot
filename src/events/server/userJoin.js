@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require('discord.js');
-const { serverSchema, userSchema } = require('models');
-const logger = require('utils/logger');
-const client = require('client');
+const { serverSchema, userSchema } = require('@models');
+const logger = require('@utils/logger');
+const client = require('@client');
 
 client.on('guildMemberAdd', async (member) => {
     const guild = member.guild;

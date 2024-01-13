@@ -1,6 +1,6 @@
 const { Routes, REST } = require('discord.js');
 const AsciiTable = require('ascii-table');
-const logger = require('utils/logger');
+const logger = require('@utils/logger');
 const chalk = require('chalk');
 const path = require('path');
 const fs = require('fs').promises;
