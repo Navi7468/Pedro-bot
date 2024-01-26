@@ -1,10 +1,11 @@
 const { EmbedBuilder } = require('discord.js');
-const { serverSchema, userSchema } = require('models');
-const logger = require('utils/logger');
-const client = require('client');
+const { serverSchema, userSchema } = require('@models');
+const logger = require('@utils/logger');
+const client = require('@client');
 
 client.on('guildMemberAdd', async (member) => {
     const guild = member.guild;
+    const guildUser = guild.members.cache.get(member.user.id);
     logger.info(`User ${member.user.username} (${member.user.id}) joined ${guild.name} (${guild.id})`);
 
     const server = await serverSchema.findOne({ guildId: guild.id });
@@ -42,9 +43,9 @@ client.on('guildMemberAdd', async (member) => {
         if (!botRole) return logger.error(`Bot role ${server.roles.bot.id} does not exist in ${guild.name} (${guild.id}) and cannot be assigned to ${member.user.tag} (${member.user.id})`);
         await member.roles.add(botRole);
     } else {
-        server.roles.default.forEach(role => {
+        server.roles.autoRoles.forEach(role => {
             if (!guild.roles.cache.get(role.id)) return logger.error(`Role ${role.id} does not exist in ${guild.name} (${guild.id}) and cannot be assigned to ${member.user.tag} (${member.user.id})`);
-            member.roles.add(role.id);
+            guildUser.roles.add(role.id);
             logger.info(`Assigned role ${role.id} to ${member.user.tag} (${member.user.id}) in ${guild.name} (${guild.id})`);
         });
     }

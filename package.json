@@ -28,8 +28,8 @@
     "ytdl-core": "^4.11.5"
   },
   "_moduleAliases": {
-    "client": "./main.js",
-    "utils": "./src/util",
-    "models": "./src/models"
+    "@client": "./main.js",
+    "@utils": "./src/utils",
+    "@models": "./src/models"
   }
 }

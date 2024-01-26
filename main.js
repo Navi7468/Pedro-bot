@@ -1,5 +1,5 @@
 const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
-const { YouTubeExtractor, SpotifyExtractor, AppleMusicExtractor } = require('@discord-player/extractor');
+const { YouTubeExtractor, SpotifyExtractor, AppleMusicExtractor, AttachmentExtractor } = require('@discord-player/extractor');
 const { Player, GuildQueue } = require('discord-player');
 require('module-alias/register');
 const mongoose = require('mongoose');
@@ -7,7 +7,7 @@ const chalk = require('chalk');
 require('dotenv').config();
 const fs = require('fs');
 
-const logger = require('utils/logger');
+const logger = require('@utils/logger');
 
 if (!process.env.CLIENT_TOKEN) {
     logger.error('CLIENT_TOKEN is not defined in the .env file!');
@@ -45,24 +45,25 @@ client.selectMenus = new Collection();
 client.aliases = new Collection();
 
 const player = new Player(client, {
-    leaveOnEnd: false,
-    leaveOnStop: false,
+    leaveOnStop: true,
+    leaveOnStopCooldown: 5000,
+    leaveOnEnd: true,
+    leaveOnEndCooldown: 15000,
     leaveOnEmpty: true,
+    leaveOnEmptyCooldown: 300000,
     autoSelfDeaf: true,
     ytdlOptions: {
         quality: 'highestaudio',
         highWaterMark: 1 << 25,
     },
     volume: 5,
-    enableLive: true,
-    disableEasing: true,
 });
 
 (async function () {
     console.log(chalk.green('Loading extractors...'));
     player.extractors.register(YouTubeExtractor, {});
     player.extractors.register(SpotifyExtractor, {});
-    player.extractors.register(AppleMusicExtractor, {});
+    player.extractors.register(AttachmentExtractor, {});
     console.log(chalk.greenBright('Loaded extractors!'));
 })();
 client.player = player;

@@ -1,5 +1,5 @@
-const { hasRequiredPermissions } = require('utils/commandHelpers');
-const client = require("../../..")
+const { hasRequiredPermissions } = require('@utils/commandHelpers');
+const client = require("@client")
 
 client.on('interactionCreate', async interaction => {
     if (!interaction.isButton()) return;

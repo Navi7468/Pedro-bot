@@ -2,8 +2,8 @@ const { ApplicationCommandType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, B
 const colorNameToHex = require('colornames');
 const fs = require('fs');
 
-const userSchema = require('models/userSchema');
-const logger = require('utils/logger');
+const userSchema = require('@models/userSchema');
+const logger = require('@utils/logger');
 
 module.exports = {
     name: 'role',

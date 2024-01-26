@@ -1,7 +1,7 @@
 const { Collection } = require('discord.js');
-const { logger, checkCooldown, hasRequiredPermissions } = require('utils');
-const serverSchema = require('models/serverSchema');
-const client = require('client');
+const { logger, checkCooldown, hasRequiredPermissions } = require('@utils');
+const serverSchema = require('@models/serverSchema');
+const client = require('@client');
 
 const prefixCache = new Collection();
 

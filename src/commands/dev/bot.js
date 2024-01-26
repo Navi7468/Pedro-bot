@@ -1,7 +1,7 @@
 const { ApplicationCommandType, EmbedBuilder } = require('discord.js');
 
-const { botSchema, serverSchema, userSchema } = require('models')
-const logger = require('utils/logger')
+const { botSchema, serverSchema, userSchema } = require('@models')
+const logger = require('@utils/logger')
 
 module.exports = {
     name: 'bot',

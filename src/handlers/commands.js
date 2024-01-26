@@ -1,6 +1,6 @@
 const { Routes, REST } = require('discord.js');
 const AsciiTable = require('ascii-table');
-const logger = require('utils/logger');
+const logger = require('@utils/logger');
 const chalk = require('chalk');
 const path = require('path');
 const fs = require('fs').promises;
@@ -68,6 +68,7 @@ module.exports = async (client) => {
 
     const rest = new REST({ version: "9" }).setToken(TOKEN);
     try {
+        // await rest.put(Routes.applicationGuildCommands(CLIENT_ID, "1179111925657903185"), { body: formattedCommands });
         await rest.put(Routes.applicationCommands(CLIENT_ID), { body: formattedCommands });
         logger.info(`Successfully loaded application commands.`);
     } catch (error) {

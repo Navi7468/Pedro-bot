@@ -1,69 +1,92 @@
 const { ApplicationCommandType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { useQueue, useMainPlayer } = require('discord-player');
-const logger = require('utils/logger');
+const { useQueue, useMainPlayer, QueryType } = require('discord-player');
+const audioFilePath = '/home/navi/Desktop/Pedro-bot/src/audio/quack.mp3';
+const logger = require('@utils/logger');
+const chalk = require('chalk');
+
+const searchEngines = {
+    youtube: QueryType.YOUTUBE_SEARCH,
+    spotify: QueryType.SPOTIFY_SEARCH,
+};
 
 module.exports = {
     name: 'play',
-    description: 'Plays a song from YouTube, Spotify, or Apple Music.',
+    description: 'Plays a song from \`Spotify\`.',
     type: ApplicationCommandType.ChatInput,
     options: [
         {
-            name: 'song',
-            description: 'The song you want to play (YouTube URL or search query)',
-            type: 3,
-            required: true,
-            autocomplete: true
+            name: 'spotify',
+            description: 'Plays a song from \`Spotify\`.',
+            type: 1,
+            options: [
+                {
+                    name: 'song',
+                    description: 'The song you want to play (Spotify URL or search query)',
+                    type: 3,
+                    required: true,
+                    autocomplete: true
+                }                
+            ]
         },
         {
-            name: 'using',
-            description: 'The service to use to play the song',
-            type: 3,
-            required: false,
-            autocomplete: true
+            name: 'youtube',
+            description: 'Plays a song from \`YouTube\`.',
+            type: 1,
+            options: [
+                {
+                    name: 'song',
+                    description: 'The song you want to play (YouTube URL or search query)',
+                    type: 3,
+                    required: true,
+                    autocomplete: true
+                }
+            ]
         }
     ],
     autocomplete: async (interaction, choices) => {
         const player = useMainPlayer();
-        const query = interaction.options.getString('song');
-        if (!query) return;
+        const command = interaction.options.getSubcommand(); // spotify or youtube
+        const song = interaction.options.getString('song');
+        if (!song) return;
+     
+        const results = await player.search(song, { searchEngine: searchEngines[command] });
 
-        const results = await player.search(query);
         results.tracks.forEach((track, index) => {
+            const title = `${track.title} - ${track.author}`;
+            const name = title.length > 100 ? `${title.substr(0, 97)}...` : title;
+
             choices.push({
-                name: track.title,
-                value: track.title
+                name: name,
+                value: track.url
             });
         });
 
         await interaction.respond(choices).catch(console.error);
     },
     slash: async (client, interaction) => {
+        const queue = useQueue(interaction.guild.id);
         const song = interaction.options.getString('song');
+        const channel = interaction.member.voice.channel || null;
 
-        if (!interaction.member.voice.channel) {
-            return interaction.reply('You need to be in a voice channel to play music!');
-        }
+        console.log(chalk.blueBright(`[COMMAND RAN] ${interaction.user.tag}, args:\n${JSON.stringify(interaction.options)}`));
+
+        if (!channel) return interaction.reply('You need to be in a voice channel to play music!');
 
         try {
-            const queue = useQueue(interaction.guild.id);
-            const { track } = await client.player.play(interaction.member.voice.channel, song, {
-                metadata: {
-                    channel: interaction
-                },
-                requestedBy: interaction.user,
-                volume: 25,
-                leaveOnEnd: false,
-                leaveOnStop: false,
-                leaveOnEmpty: true
-            });
+            client.player.play(channel, audioFilePath, { searchEngine: QueryType.FILE });
 
-            if (track) {
-                const isNowPlaying = !queue || queue.tracks.length === 0;
-                sendTrackEmbed(interaction, track, isNowPlaying);
-            } else {
-                interaction.reply('Could not find the track.');
-            }
+            const { track } = await client.player.play(channel, song, {
+                metadata: { channel: channel },
+                requestedBy: interaction.user,
+            });
+            if (!track) return interaction.reply('Could not find the track.');
+            
+            const isNowPlaying = !queue || queue.tracks.length === 0;
+            // client.player.emit('nowPlaying', queue, track);
+            sendTrackEmbed(interaction, track, isNowPlaying);
+
         } catch (error) {
+            console.log(error);
             logger.error('Error playing the song:', error);
             interaction.reply('There was an error trying to play the song.');
         }
