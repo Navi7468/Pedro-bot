@@ -8,6 +8,7 @@ client.on('guildMemberAdd', async (member) => {
         await handleMemberJoin(member);
     } catch (error) {
         logger.error(`Error handling member join: ${error.message}`);
+        console.error(error);
     }
 });
 
@@ -30,6 +31,7 @@ async function getServer(guild) {
 }
 
 async function sendWelcomeMessage(member, server) {
+    const guild = member.guild;
     const memberJoin = server.events.memberJoin;
     if (!memberJoin.enabled) return logger.info(`Member join event is disabled in ${guild.name} (${guild.id})`);
     if (!memberJoin.channelId) return logger.error(`Welcome channel is not set in ${guild.name} (${guild.id})`);
@@ -60,6 +62,7 @@ async function sendWelcomeMessage(member, server) {
 }
 
 async function assignRole(member, server) {
+    const guild = member.guild;
     if (member.user.bot) {
         const botRole = member.guild.roles.cache.get(server.roles.bot.id);
         if (!botRole) return logger.error(`Bot role ${server.roles.bot.id} does not exist in ${guild.name} (${guild.id}) and cannot be assigned to ${member.user.tag} (${member.user.id})`);
