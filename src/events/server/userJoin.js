@@ -4,17 +4,37 @@ const logger = require('@utils/logger');
 const client = require('@client');
 
 client.on('guildMemberAdd', async (member) => {
+    try {
+        await handleMemberJoin(member);
+    } catch (error) {
+        logger.error(`Error handling member join: ${error.message}`);
+    }
+});
+
+async function handleMemberJoin(member) {
     const guild = member.guild;
-    const guildUser = guild.members.cache.get(member.user.id);
     logger.info(`User ${member.user.username} (${member.user.id}) joined ${guild.name} (${guild.id})`);
+    
+    const server = await getServer(guild);
+    if (!server) return;
 
+    await sendWelcomeMessage(member, server);
+    await assignRole(member, server);
+    await handleUserDatabase(member);
+}
+
+async function getServer(guild) {
     const server = await serverSchema.findOne({ guildId: guild.id });
-    if (!server) return logger.error(`Server ${guild.name} (${guild.id}) does not exist in the database`);
+    if (!server) logger.error(`Server ${guild.name} (${guild.id}) does not exist in the database`);
+    return server;
+}
 
+async function sendWelcomeMessage(member, server) {
     const memberJoin = server.events.memberJoin;
     if (!memberJoin.enabled) return logger.info(`Member join event is disabled in ${guild.name} (${guild.id})`);
+    if (!memberJoin.channelId) return logger.error(`Welcome channel is not set in ${guild.name} (${guild.id})`);
 
-    const welcomeChannel = guild.channels.cache.get(memberJoin.channelId);
+    const welcomeChannel = member.guild.channels.cache.get(memberJoin.channelId);
     if (!welcomeChannel) return logger.error(`Welcome channel ${memberJoin.channelId} does not exist in ${guild.name} (${guild.id})`);
 
     var welcomeMessage = memberJoin.messages[Math.floor(Math.random() * memberJoin.messages.length)]
@@ -37,19 +57,25 @@ client.on('guildMemberAdd', async (member) => {
     } else {
         logger.error(`Invalid event type ${memberJoin.type} in ${guild.name} (${guild.id})`);
     }
+}
 
+async function assignRole(member, server) {
     if (member.user.bot) {
-        const botRole = guild.roles.cache.get(server.roles.bot.id);
+        const botRole = member.guild.roles.cache.get(server.roles.bot.id);
         if (!botRole) return logger.error(`Bot role ${server.roles.bot.id} does not exist in ${guild.name} (${guild.id}) and cannot be assigned to ${member.user.tag} (${member.user.id})`);
         await member.roles.add(botRole);
     } else {
-        server.roles.autoRoles.forEach(role => {
-            if (!guild.roles.cache.get(role.id)) return logger.error(`Role ${role.id} does not exist in ${guild.name} (${guild.id}) and cannot be assigned to ${member.user.tag} (${member.user.id})`);
-            guildUser.roles.add(role.id);
-            logger.info(`Assigned role ${role.id} to ${member.user.tag} (${member.user.id}) in ${guild.name} (${guild.id})`);
-        });
+        if (server.roles.autoRoles.length) {
+            server.roles.autoRoles.forEach(role => {
+                if (!member.guild.roles.cache.get(role.id)) return logger.error(`Role ${role.id} does not exist in ${guild.name} (${guild.id}) and cannot be assigned to ${member.user.tag} (${member.user.id})`);
+                member.roles.add(role.id);
+                logger.info(`Assigned role ${role.id} to ${member.user.tag} (${member.user.id}) in ${guild.name} (${guild.id})`);
+            });
+        }
     }
+}
 
+async function handleUserDatabase(member) {
     const user = await userSchema.findOne({ userId: member.user.id });
     if (user) return logger.info(`User ${member.user.tag} (${member.user.id}) already exists in the database`);
 
@@ -60,4 +86,67 @@ client.on('guildMemberAdd', async (member) => {
     });
     await newUser.save();
     logger.info(`User ${member.user.tag} (${member.user.id}) added to the database`);
-});
+}
+
+
+
+//     const guild = member.guild;
+//     const guildUser = guild.members.cache.get(member.user.id);
+//     logger.info(`User ${member.user.username} (${member.user.id}) joined ${guild.name} (${guild.id})`);
+
+//     const server = await serverSchema.findOne({ guildId: guild.id });
+//     if (!server) return logger.error(`Server ${guild.name} (${guild.id}) does not exist in the database`);
+
+//     const memberJoin = server.events.memberJoin;
+//     if (!memberJoin.enabled) return logger.info(`Member join event is disabled in ${guild.name} (${guild.id})`);
+//     if (!memberJoin.channelId) return logger.error(`Welcome channel is not set in ${guild.name} (${guild.id})`);
+
+//     const welcomeChannel = guild.channels.cache.get(memberJoin.channelId);
+//     if (!welcomeChannel) return logger.error(`Welcome channel ${memberJoin.channelId} does not exist in ${guild.name} (${guild.id})`);
+
+//     var welcomeMessage = memberJoin.messages[Math.floor(Math.random() * memberJoin.messages.length)]
+//         .replace(/{user}/g, member.user)
+//         .replace(/{server}/g, guild.name)
+//         .replace(/{memberCount}/g, guild.memberCount);
+
+//     if (memberJoin.type === 'message') {
+//         welcomeChannel.send({ content: welcomeMessage });
+//     } else if (memberJoin.type === 'embed') {
+//         const embed = new EmbedBuilder()
+//             .setTitle(member.user.tag)
+//             .setDescription(welcomeMessage)
+//             .setColor(memberJoin.embed.color)
+//             .setTimestamp(memberJoin.embed.timestamp ? new Date() : null)
+//             .setAuthor(memberJoin.embed.author.name, memberJoin.embed.author.icon_url)
+//             .setThumbnail(memberJoin.embed.thumbnail)
+//             .setFooter(memberJoin.embed.footer);
+//         welcomeChannel.send({ embeds: [embed] });
+//     } else {
+//         logger.error(`Invalid event type ${memberJoin.type} in ${guild.name} (${guild.id})`);
+//     }
+
+//     if (member.user.bot) {
+//         const botRole = guild.roles.cache.get(server.roles.bot.id);
+//         if (!botRole) return logger.error(`Bot role ${server.roles.bot.id} does not exist in ${guild.name} (${guild.id}) and cannot be assigned to ${member.user.tag} (${member.user.id})`);
+//         await member.roles.add(botRole);
+//     } else {
+//         if (server.roles.autoRoles.length) {
+//             server.roles.autoRoles.forEach(role => {
+//                 if (!guild.roles.cache.get(role.id)) return logger.error(`Role ${role.id} does not exist in ${guild.name} (${guild.id}) and cannot be assigned to ${member.user.tag} (${member.user.id})`);
+//                 guildUser.roles.add(role.id);
+//                 logger.info(`Assigned role ${role.id} to ${member.user.tag} (${member.user.id}) in ${guild.name} (${guild.id})`);
+//             });
+//         }
+//     }
+
+//     const user = await userSchema.findOne({ userId: member.user.id });
+//     if (user) return logger.info(`User ${member.user.tag} (${member.user.id}) already exists in the database`);
+
+//     const newUser = new userSchema({
+//         userId: member.user.id,
+//         username: member.user.username,
+//         globalName: member.user.username
+//     });
+//     await newUser.save();
+//     logger.info(`User ${member.user.tag} (${member.user.id}) added to the database`);
+// });

@@ -1,4 +1,4 @@
-const { Routes, REST } = require('discord.js');
+const { Routes, REST, ApplicationCommandType } = require('discord.js');
 const AsciiTable = require('ascii-table');
 const logger = require('@utils/logger');
 const chalk = require('chalk');
@@ -76,6 +76,7 @@ module.exports = async (client) => {
     }
 };
 
+// Formats the console output for the command list
 function formatRows(rows) {
     const markColumnWidth = 7;  // Width of the Chat and Slash columns
     let currentDir = "";

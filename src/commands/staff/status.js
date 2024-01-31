@@ -66,6 +66,7 @@ module.exports = {
             required: false
         }
     ],
+    userPerms: [ PermissionsBitField.Flags.Administrator ],
     slash: async (client, interaction) => {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
             logger.info(`${interaction.user.tag} tried to use the status command in ${interaction.guild.name} (${interaction.guild.id}) but does not have the required permissions`);

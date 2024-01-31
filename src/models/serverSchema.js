@@ -13,7 +13,7 @@ const EmbedSchema = new mongoose.Schema({
 
 const EventSettingsSchema = new mongoose.Schema({
     enabled: { type: Boolean, required: true },
-    channelId: { type: String, required: true },
+    channelId: { type: String, required: false },
     messages: [{ type: String, required: true }],
     type: { type: String, required: true, enum: ['message', 'embed'] },
     embed: EmbedSchema
@@ -32,6 +32,8 @@ const serverSchema = new mongoose.Schema({
     events: {
         memberJoin: EventSettingsSchema,
         memberLeave: EventSettingsSchema,
+        messageDelete: EventSettingsSchema,
+        messageEdit: EventSettingsSchema,
         birthday: EventSettingsSchema
     },
     roles: {
@@ -39,7 +41,7 @@ const serverSchema = new mongoose.Schema({
         muteRole: RoleSchema,
         botRole: RoleSchema,
         autoRoles: [RoleSchema],
-        selfRoles: [{ name: String, reactionId: String, roles: [RoleSchema] }]
+        selfRoles: [{ name: String, reactionId: String, single: Boolean, roles: [RoleSchema] }]
     },
     __v: { type: Number, default: 0 }
 }, { timestamps: true });

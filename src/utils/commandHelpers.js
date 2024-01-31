@@ -3,9 +3,15 @@ const ms = require('ms');
 
 const cooldowns = new Collection();
 
+function getPermissionName(permBit) {
+    return Object.keys(PermissionsBitField.Flags).find(key => PermissionsBitField.Flags[key] === permBit);
+}
+
 function checkCooldown(command, context) {
     try {
-        const key = `${command.name}-${context.user.id || context.author.id}`;
+        const user = context.user || context.author;
+        const key = `${command.name}-${user.id}`;
+
         if (cooldowns.has(key)) {
             const remainingTime = ms(cooldowns.get(key) - Date.now(), { long: true });
             context.reply(`🚫 You are on a ${remainingTime} cooldown!`);
@@ -27,9 +33,10 @@ function hasRequiredPermissions(command, context) {
     const missingBotPerms = command.botPerms && !context.guild.members.cache.get(context.client.user.id).permissions.has(PermissionsBitField.resolve(command.botPerms));
 
     if (missingUserPerms || missingBotPerms) {
-        const missingPermissions = missingUserPerms ? command.userPerms : command.botPerms;
+        const missingPermissions = (missingUserPerms ? command.userPerms : command.botPerms)
+            .map(perm => getPermissionName(perm)).join(', ');
         const embed = new EmbedBuilder()
-            .setColor('RED')
+            .setColor('#ff0000')
             .setDescription(`🚫 ${context.user}, you are missing the following permissions: \`${missingPermissions}\` to use this command.`);
         context.reply({ embeds: [embed] });
         return false;

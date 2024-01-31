@@ -64,17 +64,16 @@ module.exports = {
         await interaction.respond(choices).catch(console.error);
     },
     slash: async (client, interaction) => {
-        const queue = useQueue(interaction.guild.id);
+        let queue = useQueue(interaction.guild.id);
         const song = interaction.options.getString('song');
         const channel = interaction.member.voice.channel || null;
 
-        console.log(chalk.blueBright(`[COMMAND RAN] ${interaction.user.tag}, args:\n${JSON.stringify(interaction.options)}`));
+        // console.log(chalk.blueBright(`[COMMAND RAN] ${interaction.user.tag}, args:\n${JSON.stringify(interaction.options)}`));
 
         if (!channel) return interaction.reply('You need to be in a voice channel to play music!');
 
         try {
-            client.player.play(channel, audioFilePath, { searchEngine: QueryType.FILE });
-
+            if (!queue) await client.player.play(channel, audioFilePath, { searchEngine: QueryType.FILE });
             const { track } = await client.player.play(channel, song, {
                 metadata: { channel: channel },
                 requestedBy: interaction.user,
