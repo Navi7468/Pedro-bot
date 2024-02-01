@@ -33,7 +33,8 @@ const serverSchema = new mongoose.Schema({
         memberJoin: EventSettingsSchema,
         memberLeave: EventSettingsSchema,
         messageDelete: EventSettingsSchema,
-        messageEdit: EventSettingsSchema,
+        messageUpdate: EventSettingsSchema,
+        counting: EventSettingsSchema,
         birthday: EventSettingsSchema
     },
     roles: {
