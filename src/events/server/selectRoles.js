@@ -112,3 +112,17 @@ client.on('messageReactionRemove', async (reaction, user) => {
     if (!guildUser.roles.cache.has(role.id)) return;
     guildUser.roles.remove(role.id).catch(console.error);
 });
+
+
+
+/*
+// Handle single role logic
+        if (selectRole.single) {
+            const fetchedMessage = await message.fetch();
+            fetchedMessage.reactions.cache.each(async (reactionOfMessage) => {
+                if (reactionOfMessage.emoji.name !== reaction.emoji.name) {
+                    await reactionOfMessage.users.remove(user.id);
+                }
+            });
+        }
+*/ 

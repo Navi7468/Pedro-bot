@@ -29,7 +29,7 @@ client.on('messageDelete', async (message) => {
     if (!logChannel) return;
 
     const randomMessageTemplate = server.events.messageDelete.messages[Math.floor(Math.random() * server.events.messageDelete.messages.length)];
-    const logMessage = randomMessageTemplate
+    let logMessage = randomMessageTemplate
         .replace(/{globalname}/g, message.author.username)
         .replace(/{channel}/g, message.channel.id)
         .replace(/{executor}/g, executor || 'Unknown')
@@ -45,6 +45,28 @@ client.on('messageDelete', async (message) => {
         .setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL() })
         .setTimestamp(embedData.timestamp ? new Date() : null);
 
+    // Set the thumbnail as the image of the deleted message if it exists 
+    if (logMessage.includes('[Content Not Available]')) {
+        const attachments = message.attachments;
+        // console.log(attachments);
+        let type = 'Attachment';
+        if (message.attachments.size > 0) {
+            embed.setThumbnail(attachments.first().url);
+            // replace "[Content Not Available]" with "Attachment" or "Attachments"
+            attachments.size > 1 ? type = 'Attachments' : type = 'Attachment';
+
+            logMessage = logMessage.replace('[Content Not Available]', type);
+            
+            embed.setDescription(`${logMessage}`);   
+            // for (const [key, attachment] of attachments) {
+            //     embed.addFields({ name: `Attachment ${key}`, value: attachment.url, inline: true });
+            // }         
+            Array.from(attachments.values()).forEach((attachment, index) => {
+                embed.addFields({ name: `Attachment ${index + 1}`, value: attachment.url, inline: true });
+            });
+        }
+    }
+        
     logChannel.send({ embeds: [embed] });
 });
 
@@ -59,7 +81,7 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
 
         const guild = oldMessage.guild;
         const server = await serverSchema.findOne({ guildId: guild.id });
-        if (!server || !server.events.messageUpdate.enabled) return;
+        if (!server || !server.events.messageUpdate?.enabled) return;
 
         const logChannel = guild.channels.cache.get(server.events.messageUpdate.channelId);
         if (!logChannel) return;
@@ -73,7 +95,7 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
         const logMessage = randomMessageTemplate
             .replace(/{globalname}/g, oldMessage.author.username)
             .replace(/{channel}/g, oldMessage.channel.id)
-            .replace(/{user}/g, oldMessage.author.tag)
+            .replace(/{user}/g, oldMessage.author)
             .replace(/{avatar}/g, oldMessage.author.displayAvatarURL())
             .replace(/{oldContent}/g, oldMessage.content || '[Content Not Available]')
             .replace(/{newContent}/g, newMessage.content || '[Content Not Available]');

@@ -22,7 +22,8 @@ const EventSettingsSchema = new mongoose.Schema({
 const RoleSchema = new mongoose.Schema({
     name: { type: String, required: true },
     id: { type: String, required: true },
-    emoji: { type: String }
+    emoji: { type: String },
+    ignoreSingle: { type: Boolean }
 });
 
 const serverSchema = new mongoose.Schema({
