@@ -12,7 +12,6 @@ client.on('channelCreate', async (channel) => {
     const newChannelName = fontConverter(channel.name);
     await channel.setName(newChannelName);
     logger.info(`Channel ${channel.name} has been created`);
-
 });
 
 client.on('channelUpdate', async (oldChannel, newChannel) => {
@@ -23,5 +22,5 @@ client.on('channelUpdate', async (oldChannel, newChannel) => {
     if (newChannel.name === newChannelName) return;
 
     await newChannel.setName(newChannelName);
-    logger.info(`Channel ${newChannel.name} has been updated`);
+    logger.info(`Channel ${newChannel.name} has been updated to ${newChannelName}`);
 });

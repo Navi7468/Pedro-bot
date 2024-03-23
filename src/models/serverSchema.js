@@ -30,11 +30,13 @@ const serverSchema = new mongoose.Schema({
     guildId: { type: String, required: true, unique: true },
     guildName: { type: String, required: true },
     prefix: { type: String, default: '!' },
+    volume: { type: Number, default: 5 },
     events: {
         memberJoin: EventSettingsSchema,
         memberLeave: EventSettingsSchema,
         messageDelete: EventSettingsSchema,
         messageUpdate: EventSettingsSchema,
+        inviteCreate: EventSettingsSchema,
         counting: EventSettingsSchema,
         birthday: EventSettingsSchema
     },

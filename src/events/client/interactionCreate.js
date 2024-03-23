@@ -9,8 +9,8 @@ client.on('interactionCreate', async interaction => {
 
     try {
         if (interaction.isAutocomplete()) {
-            const choices = [];
-            await command.autocomplete(interaction, choices);
+            // const choices = [];
+            await command.autocomplete(interaction, []);
             return;
         }
 

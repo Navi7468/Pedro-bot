@@ -86,10 +86,10 @@ module.exports = {
                 await message.react(role.emoji);
             }
 
-            interaction.reply({ content: `Self roles have been set up with title: ${categoryName}`, ephemeral: true });
+            await interaction.reply({ content: `Self roles have been set up with title: ${categoryName}`, ephemeral: true });
         } catch (error) {
             console.error('An error occurred:', error);
-            interaction.reply({ content: 'An error occurred while setting up self roles.', ephemeral: true });
+            await interaction.reply({ content: 'An error occurred while setting up self roles.', ephemeral: true });
         }
     }
 };

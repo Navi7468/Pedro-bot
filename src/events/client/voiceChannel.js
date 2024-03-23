@@ -18,3 +18,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
     //     }
     // }
 });
+
+// client.player.on('trackStart', (queue, track) => {
+//     sendTrackEmbed(queue.metadata.channel, track, true); // 'true' because the track is now playing
+// });

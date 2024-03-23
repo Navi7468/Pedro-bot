@@ -1,6 +1,6 @@
-const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, Partials, EmbedBuilder } = require('discord.js');
 const { YouTubeExtractor, SpotifyExtractor, AppleMusicExtractor, AttachmentExtractor } = require('@discord-player/extractor');
-const { Player, GuildQueue } = require('discord-player');
+const { Player, GuildQueue, PlayerEvent, useMainPlayer } = require('discord-player');
 require('module-alias/register');
 const mongoose = require('mongoose');
 const chalk = require('chalk');
@@ -9,7 +9,11 @@ const fs = require('fs');
 
 const logger = require('@utils/logger');
 
-if (!process.env.CLIENT_TOKEN) {
+
+const testing = process.env.TESTING === "true" ? true : false;
+const TOKEN = testing ? process.env.TESTING_TOKEN : process.env.CLIENT_TOKEN;
+
+if (!TOKEN) {
     logger.error('CLIENT_TOKEN is not defined in the .env file!');
     process.exit(1);
 }
@@ -45,7 +49,7 @@ client.selectMenus = new Collection();
 client.aliases = new Collection();
 
 const player = new Player(client, {
-    leaveOnStop: true,
+    leaveOnStop: false,
     leaveOnStopCooldown: 5000,
     leaveOnEnd: true,
     leaveOnEndCooldown: 15000,
@@ -78,7 +82,7 @@ try {
     logger.error(`Error loading handlers: ${error.message}`);
 }
 
-client.login(process.env.CLIENT_TOKEN).catch((error) => {
+client.login(TOKEN).catch((error) => {
     logger.error(`Error logging in: ${error.message}`);
     process.exit(1);
 });

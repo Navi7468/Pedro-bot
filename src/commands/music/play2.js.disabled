@@ -1,0 +1,116 @@
+const { ApplicationCommandType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { useQueue, useMainPlayer, QueryType } = require('discord-player');
+const audioFilePath = '/home/navi/Desktop/Pedro-bot/src/audio/quack.mp3';
+const logger = require('@utils/logger');
+const chalk = require('chalk');
+
+const searchEngines = {
+    youtube: QueryType.YOUTUBE_SEARCH,
+    spotify: QueryType.SPOTIFY_SEARCH,
+};
+
+module.exports = {
+    name: 'play2',
+    description: 'Plays a song from \`Spotify\`.',
+    type: ApplicationCommandType.ChatInput,
+    options: [
+        {
+            name: 'spotify',
+            description: 'Plays a song from \`Spotify\`.',
+            type: 1,
+            options: [
+                {
+                    name: 'song',
+                    description: 'The song you want to play (Spotify URL or search query)',
+                    type: 3,
+                    required: true,
+                    autocomplete: true
+                }                
+            ]
+        },
+        {
+            name: 'youtube',
+            description: 'Plays a song from \`YouTube\`.',
+            type: 1,
+            options: [
+                {
+                    name: 'song',
+                    description: 'The song you want to play (YouTube URL or search query)',
+                    type: 3,
+                    required: true,
+                    autocomplete: true
+                }
+            ]
+        }
+    ],
+    autocomplete: async (interaction, choices) => {
+        const player = useMainPlayer();
+        const command = interaction.options.getSubcommand(); // spotify or youtube
+        const song = interaction.options.getString('song');
+        if (!song) return;
+     
+        const results = await player.search(song, { searchEngine: searchEngines[command] });
+
+        results.tracks.forEach((track, index) => {
+            const title = `${track.title} - ${track.author}`;
+            const name = title.length > 100 ? `${title.substr(0, 97)}...` : title;
+
+            choices.push({
+                name: name,
+                value: track.url
+            });
+        });
+
+        await interaction.respond(choices).catch(console.error);
+    },
+    slash: async (client, interaction) => {
+        let queue = useQueue(interaction.guild.id);
+        const song = interaction.options.getString('song');
+        const channel = interaction.member.voice.channel || null;
+
+        // console.log(chalk.blueBright(`[COMMAND RAN] ${interaction.user.tag}, args:\n${JSON.stringify(interaction.options)}`));
+
+        if (!channel) return interaction.reply('You need to be in a voice channel to play music!');
+
+        try {
+            if (!queue) await client.player.play(channel, audioFilePath, { searchEngine: QueryType.FILE });
+            const { track } = await client.player.play(channel, song, { requestedBy: interaction.user });
+            if (!track) return interaction.reply('Could not find the track.');
+            
+            const isNowPlaying = !queue || queue.tracks.length === 0;
+            if (!isNowPlaying) {
+                sendTrackEmbed(interaction, track);
+            } else {
+                interaction.reply({ content: `Now playing: ${track.title}`, ephemeral: true });
+            }
+            // sendTrackEmbed(interaction, track, isNowPlaying);
+
+        } catch (error) {
+            console.log(error);
+            logger.error('Error playing the song:', error);
+            interaction.reply('There was an error trying to play the song.');
+        }
+    },
+
+};
+
+function sendTrackEmbed(interaction, track) {
+    const fieldsToAdd = ['artist', 'album', 'duration'].map(field => 
+        track[field] ? { name: field.charAt(0).toUpperCase() + field.slice(1), value: track[field], inline: true } : null
+    ).filter(Boolean); // Removes any null entries if track[field] does not exist
+
+    const embed = new EmbedBuilder()
+        .setAuthor({ name: 'Added to queue' })
+        .setTitle(track.title)
+        .setURL(track.url)
+        .setColor('Blue')
+        .setThumbnail(track.thumbnail)
+        .setTimestamp()
+        .addFields(fieldsToAdd);
+
+    if (track.requestedBy) {
+        embed.addFields({ name: 'Requested By', value: `<@${track.requestedBy.id}>`, inline: true });
+    }
+
+    interaction.reply({ embeds: [embed] });
+}

@@ -44,7 +44,7 @@ module.exports = {
         const row = new ActionRowBuilder().addComponents(stopButton, pausePlayButton, nextButton, queueButton);
 
         // Update the interaction
-        await interaction.message.reply({ embeds: [embed], components: [row] });
+        // await interaction.message.reply({ embeds: [embed], components: [row] });
         await interaction.update({ components: [] });
     }
 };

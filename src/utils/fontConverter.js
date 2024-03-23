@@ -79,16 +79,22 @@ const letters = {
     Z: '𝒵'
 };
 
-function fontConverter(font) {
+function fontConverter(text) {
     let converted = '';
-    for (let i = 0; i < font.length; i++) {
-        if (letters[font[i]]) {
-            converted += letters[font[i]];
+    for (let i = 0; i < text.length; i++) {
+        if (letters[text[i].toLowerCase()]) {
+            if (i === 0 || text[i - 1] === ' ' || text[i - 1] === '-') {
+                converted += letters[text[i].toUpperCase()] || letters[text[i].toLowerCase()];
+            } else {
+                converted += letters[text[i].toLowerCase()];
+            }
         } else {
-            converted += font[i];
+            converted += text[i];
         }
     }
     return converted;
 }
+
+
 
 module.exports = { fontConverter };

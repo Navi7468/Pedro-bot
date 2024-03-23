@@ -1,5 +1,6 @@
 const { ApplicationCommandType, EmbedBuilder } = require('discord.js');
 const { useQueue } = require('discord-player');
+const { serverSchema } = require('@models');
 
 module.exports = {
     name: 'volume',
@@ -25,6 +26,10 @@ module.exports = {
             return interaction.reply('A song must be playing to change the volume.');
         }
 
+        const server = await serverSchema.findOne({ guildId: interaction.guild.id });
+        server.volume = volume;
+        await server.save();
+        
         queue.node.setVolume(volume);
         interaction.reply(`🎶 Changed the volume to **${volume}**`);
     }
